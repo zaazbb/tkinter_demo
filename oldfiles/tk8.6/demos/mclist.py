@@ -34,7 +34,7 @@ msg.pack(fill='x')
 
 ## See Code / Dismiss
 ##pack [addSeeDismiss $w.seeDismiss $w] -side bottom -fill x
-addSeeDismiss(w, demo_name).pack(side='bottom', fill='x')
+addSeeDismiss(ttk.Frame(w), demo_name).pack(side='bottom', fill='x')
 
 ##ttk::frame $w.container
 ##ttk::treeview $w.tree -columns {country capital currency} -show headings \

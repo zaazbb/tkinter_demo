@@ -33,7 +33,7 @@ msg.pack(side='top')
 
 ## See Code / Dismiss buttons
 ##pack [addSeeDismiss $w.buttons $w] -side bottom -fill x
-addSeeDismiss(w, demo_name).pack(side='bottom', fill='x')
+addSeeDismiss(ttk.Frame(w), demo_name).pack(side='bottom', fill='x')
 
 ##proc colorrefresh {w col} {
 ##    $w configure -bg $col

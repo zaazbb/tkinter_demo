@@ -34,7 +34,7 @@ msg.pack(side='top')
 ## See Code / Dismiss buttons
 ##set btns [addSeeDismiss $w.buttons $w]
 ##pack $btns -side bottom -fill x
-btns = addSeeDismiss(w, demo_name)
+btns = addSeeDismiss(ttk.Frame(w), demo_name)
 btns.pack(side='bottom', fill='x')
 
 ##foreach i {f1 f2 f3 f4 f5} {

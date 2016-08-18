@@ -34,7 +34,7 @@ msg.pack(fill='x')
 
 ## See Code / Dismiss
 ##pack [addSeeDismiss $w.seeDismiss $w] -side bottom -fill x
-addSeeDismiss(w, demo_name).pack(side='bottom', fill='x')
+addSeeDismiss(ttk.Frame(w), demo_name).pack(side='bottom', fill='x')
 
 ## Code to populate the roots of the tree (can be more than one on Windows)
 ##proc populateRoots {tree} {

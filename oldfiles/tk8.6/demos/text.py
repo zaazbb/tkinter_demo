@@ -30,10 +30,17 @@ positionWindow(w)
 ##set btns [addSeeDismiss $w.buttons $w {} \
 ##	{ttk::button $w.buttons.fontchooser -command fontchooserToggle}]
 ##pack $btns -side bottom -fill x
+askChooseFont(root)
 def fontchooserToggle():
-    pass
-fontchooser = ttk.Button(w, text='111')
-btns = addSeeDismiss(w, demo_name, extra=fontchooser)
+    font = askChooseFont(w)
+    #global w
+    #if w.tk.call('tk', 'fontchooser', 'configure', '-visible'):
+    #    w.tk.call('tk', 'fontchooser', 'hide')
+    #else:
+    #    w.tk.call('tk', 'fontchooser', 'show')
+buttons = ttk.Frame(w)
+fontchooser = ttk.Button(buttons, command=fontchooserToggle)
+btns = addSeeDismiss(buttons, demo_name, extra=[fontchooser])
 btns.pack(side='bottom', fill='x')
 
 ##text $w.text -yscrollcommand [list $w.scroll set] -setgrid 1 \
@@ -69,6 +76,27 @@ text.pack(expand='yes', fill='both')
 ##bind $w <<TkFontchooserVisibility>> [list \
 ##	fontchooserVisibility $w.buttons.fontchooser]
 ##focus $w.text
+def fontchooserFontSel(w, font):
+    w.configure(font=w.tk.call('font', 'actual', font))
+def fontchooserFocus(w):
+    s=w.tk.call('tk', 'fontchooser', 'configure', '-font')
+    print(s.encode())
+    #global fontchooserFontSel
+    #w.tk.call('tk', 'fontchooser', 'configure',
+    #          font=w.cget('font'),
+    #          command=lambda w=w,f=fontchooserFontSel:f(w, '11'))
+def fontchooserVisibility(ww):
+    global w
+    if w.tk.call('tk', 'fontchooser', 'configure', '-visible'):
+        ww.configure(text='Hide Font Dialog')
+    else:
+        ww.configure(text='Show Font Dialog')
+w.tk.call('tk', 'fontchooser', 'configure', '-parent', w)
+w.bind('<<TkFontchooserFontChanged>>', lambda e,f=fontchooserFocus,w=text: f(w))
+#fontchooserVisibility(fontchooser)
+#w.bind('<<TkFontchooserVisibility>>',
+#       lambda fbtn=fontchooser,f=fontchooserVisibility:f(fbtn))
+text.focus()
 
 ##$w.text insert 0.0 \
 ##{This window is a text widget.  It displays one or more lines of text

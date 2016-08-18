@@ -48,7 +48,7 @@ msg.pack(side='top')
 ## See Code / Dismiss buttons
 ##set btns [addSeeDismiss $w.buttons $w]
 ##pack $btns -side bottom -fill x
-addSeeDismiss(w, demo_name).pack(side='bottom', fill='x')
+addSeeDismiss(ttk.Frame(w), demo_name).pack(side='bottom', fill='x')
 
 ## The frame that will contain the sample texts.
 ##pack [frame $w.f] -side bottom -expand 1 -fill both -padx 2m -pady 1m

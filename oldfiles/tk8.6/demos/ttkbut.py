@@ -41,7 +41,7 @@ tomato = BooleanVar(name='tomato')
 basil = BooleanVar(name='basil')
 oregano = BooleanVar(name='oregano')
 happyness = StringVar(name='happyness')
-addSeeDismiss(w, demo_name, [enabled, cheese, tomato, basil, oregano, happyness]
+addSeeDismiss(ttk.Frame(w), demo_name, [enabled, cheese, tomato, basil, oregano, happyness]
               ).pack(side='bottom', fill='x')
 
 ## Add buttons for setting the theme

@@ -57,7 +57,7 @@ msg = Label(w, font=font_, wraplength='5i', justify='left', text="Four different
 ## See Code / Dismiss buttons
 ##set btns [addSeeDismiss $w.buttons $w]
 ##pack $btns -side bottom -fill x
-btns = addSeeDismiss(w, demo_name)
+btns = addSeeDismiss(ttk.Frame(w), demo_name)
 btns.pack(side='bottom', fill='x')
 
 # focusAndFlash --

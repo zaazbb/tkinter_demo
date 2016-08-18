@@ -826,8 +826,8 @@ def showVars(dlg, args):
     w.columnconfigure(0, weight=1)
     w.rowconfigure(0, weight=1)
     
-def addSeeDismiss(w, show, vars_=[], extra=''):
-    w = ttk.Frame(w)
+def addSeeDismiss(w, show, vars_=[], extra=[]):
+    #w = ttk.Frame(w)
     sep = ttk.Separator(w)
     sep.grid(columnspan=4, row=0, sticky='ew', pady=2)
     dismiss = ttk.Button(w, text='Dismiss', image=img_delete, compound='left',
@@ -837,14 +837,15 @@ def addSeeDismiss(w, show, vars_=[], extra=''):
                       os.system('"%s/Lib/idlelib/idle.bat" -e %s.py' \
                                 % (sys.exec_prefix, show)))
     buttons = [code, dismiss]
-    if len(vars_):
+    if vars_:
         dialog = None
         vars_btn = ttk.Button(w, text='See Variables', image=img_view,
                               compound='left',
                               command=lambda dlg=[w,dialog]:showVars(dlg, vars_))
         buttons.insert(0, vars_btn)
-    if extra != '':
-        buttons.insert(0, extra)
+    if extra:
+        #extra[0].configure(master=w)
+        buttons.insert(0, extra[0])
     for i, btn in enumerate(buttons, 1):
         btn.grid(column=i, row=1, padx=4, pady=4)
     w.columnconfigure(0, weight=1)

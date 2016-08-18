@@ -37,7 +37,7 @@ msg.grid(row=0, column=0, columnspan=3, sticky='nsew')
 size = StringVar(name='size')
 color = StringVar(name='color')
 align = StringVar(name='align')
-btns = addSeeDismiss(w, demo_name, [size, color, align])
+btns = addSeeDismiss(ttk.Frame(w), demo_name, [size, color, align])
 btns.grid(row=3, column=0, columnspan=3, sticky='ew')
 
 ##labelframe $w.left -pady 2 -text "Point Size" -padx 2

@@ -35,7 +35,7 @@ msg.pack(side='top')
 ## See Code / Dismiss buttons
 ##set btns [addSeeDismiss $w.buttons $w]
 ##pack $btns -side bottom -fill x
-btns = addSeeDismiss(w, demo_name)
+btns = addSeeDismiss(ttk.Frame(w), demo_name)
 btns.pack(side='bottom', fill='x')
 
 ##frame $w.frame -borderwidth 10

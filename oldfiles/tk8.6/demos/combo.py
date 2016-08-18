@@ -54,7 +54,7 @@ msg.pack(side='top', fill='x')
 firstValue = StringVar(name='firstValue')
 secondValue = StringVar(name='secondValue', value='unchangable')
 ozCity = StringVar(name='ozCity', value='Sydney')
-btns = addSeeDismiss(w, demo_name, [firstValue, secondValue, ozCity])
+btns = addSeeDismiss(ttk.Frame(w), demo_name, [firstValue, secondValue, ozCity])
 btns.pack(side='bottom', fill='x')
 
 ##ttk::frame $w.f

@@ -38,7 +38,7 @@ safety = StringVar(name='safety')
 wipers = BooleanVar(name='wipers')
 brakes = BooleanVar(name='brakes')
 sober = BooleanVar(name='sober')
-btns = addSeeDismiss(w, demo_name, [safety, wipers, brakes, sober])
+btns = addSeeDismiss(ttk.Frame(w), demo_name, [safety, wipers, brakes, sober])
 btns.pack(side='bottom', fill='x')
 
 ##checkbutton $w.b0 -text "Safety Check" -variable safety -relief flat \
