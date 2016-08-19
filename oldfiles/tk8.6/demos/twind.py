@@ -29,7 +29,8 @@ positionWindow(w)
 ## See Code / Dismiss buttons
 ##set btns [addSeeDismiss $w.buttons $w]
 ##pack $btns -side bottom -fill x
-btns = addSeeDismiss(ttk.Frame(w), demo_name)
+buttons = ttk.Frame(w)
+btns = addSeeDismiss(buttons, demo_name)
 btns.pack(side='bottom', fill='x')
 
 ##frame $w.f -highlightthickness 1 -borderwidth 1 -relief sunken
@@ -68,10 +69,25 @@ text.tag_configure('buttons', lmargin1='1c', lmargin2='1c', rmargin='1c',
 ##	-cursor top_left_arrow
 ##button $t.off -text "Turn Off" -command "textWindOff $w" \
 ##	-cursor top_left_arrow
-def textWindOn(w):
-    pass
-def textWindOff(w):
-    pass
+def textWindOn():
+    from tkinter import Scrollbar
+    global w, text, buttons
+    global scroll2
+    try:
+        scroll2.destroy()
+    except:
+        pass
+    scroll2 = Scrollbar(w, orient='horizontal', command=text.xview)
+    scroll2.pack(after=buttons, side='bottom', fill='x')
+    text.configure(xscrollcommand=scroll2.set, wrap='none')
+def textWindOff():
+    global text
+    global scroll2
+    try:
+        scroll2.destroy()
+    except:
+        pass
+    text.configure(xscrollcommand='', wrap='word')
 ##proc textWindOn w {
 ##    catch {destroy $w.scroll2}
 ##    set t $w.f.text
@@ -84,9 +100,9 @@ def textWindOff(w):
 ##    set t $w.f.text
 ##    $t configure -xscrollcommand {} -wrap word
 ##}
-on = Button(text, text='Turn On', command=lambda w=w: textWindOn(w),
+on = Button(text, text='Turn On', command=textWindOn,
             cursor='top_left_arrow')
-off = Button(text, text='Turn Off', command=lambda w=w: textWindOff(w),
+off = Button(text, text='Turn Off', command=textWindOff,
              cursor='top_left_arrow')
 
 ##$t insert end "A text widget can contain many different kinds of items, "
