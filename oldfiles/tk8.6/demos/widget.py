@@ -355,14 +355,15 @@ def invoke(index):
     root.update()
     demo = demo_tags[0][5:]
     demo_file = '%s/%s.py' % (tk_demoDirectory, demo)
-    global_dict = {'widgetDemo':widgetDemo,
-                   'tk_demoDirectory':tk_demoDirectory,
-                   'root':root,
-                   'font_':font_,
-                   'positionWindow':positionWindow,
-                   'addSeeDismiss':addSeeDismiss,
-                   'demo_name':demo_name}
-    exec(compile(open(demo_file).read(), demo_file, 'exec'), global_dict, {})
+    #global_dict = {'widgetDemo':widgetDemo,
+    #               'tk_demoDirectory':tk_demoDirectory,
+    #               'root':root,
+    #               'font_':font_,
+    #               'positionWindow':positionWindow,
+    #               'addSeeDismiss':addSeeDismiss,
+    #               'demo_name':demo_name}
+    #exec(compile(open(demo_file).read(), demo_file, 'exec'), global_dict, {})
+    exec(compile(open(demo_file).read(), demo_file, 'exec'), globals(), {})
     root.update()
     t['cursor'] = cursor
     t.tag_add('visited', '%s linestart +1 chars'%index,

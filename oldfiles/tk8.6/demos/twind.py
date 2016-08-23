@@ -276,10 +276,38 @@ text.insert('end', " the plot again.\n\n")
 ##  -create {button %W.split -text "Split Windows" -command "textSplitWindow %W" \
 ##  -cursor top_left_arrow} -padx 3
 ##$t insert end " \n\n"
+def create_peer(text, master, name, cnf={}, **kw):
+    class textpeer(Text):
+        """Internal class used to represent a text peer."""
+        def __init__(self, master, name):
+            BaseWidget._setup(self, master, {'name': name})
+    text.peer_create('%s.%s' % (master, name), cnf, **kw)
+    return textpeer(master, name)
 def textMakePeer(w):
     pass
-def textSplitWindow(w):
-    pass
+def textSplitWindow(textW):
+    global text, pane, scroll, w
+    global create_peer
+    if textW == text:
+        global peer
+##        if peer.winfo_exists():
+##            peer.destroy()
+##        else:
+        try:
+            #print('111')
+            print(w)
+            print(textW)
+            #peer = TextPeer(w, 'text')
+            #print(peer)
+            #textW.peer_create('%s.peer' % w, yscrollcommand=scroll.set)
+            #peer = TextPeer(w, 'peer')
+            peer = create_peer(textW, w, 'peer', yscrollcommand=scroll.set)
+            print(peer)
+            pane.add(peer)
+        except TclError:
+            peer.destroy()
+    else:
+        return
 ##proc textMakePeer {parent} {
 ##    set n 1
 ##    while {[winfo exists .peer$n]} { incr n }
@@ -311,7 +339,7 @@ def textSplitWindow(w):
 peer = Button(text, text='Make A Peer', command=lambda w=w: textMakePeer(w),
               cursor='top_left_arrow')
 split = Button(text, text='Split Windows',
-               command=lambda w=w: textSplitWindow(w),
+               command=lambda w=text, f=textSplitWindow: f(w),
                cursor='top_left_arrow')
 text.insert('end', "You can also create multiple text widgets each of which ")
 text.insert('end', "display the same underlying text. Click this button to ")
