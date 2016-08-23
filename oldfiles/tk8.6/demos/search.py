@@ -150,14 +150,14 @@ def textSearch(w, string, tag):
     w.tag_remove('search', 0.0, END)
     if string == '':
         return
-    cur = 1.0
-    length=0
+    cur = '1.0'
+    length = StringVar()
     while True:
-        cur = w.search(count=length, string, cur, END)
+        cur = w.search(string, cur, stopindex=END, count=length)
         if cur == '':
             break
-        w.tag_add(tag, cur, '%i + %i char' % (cur, length))
-        cur = w.index('%i + %i char' % (cur, length))
+        w.tag_add(tag, cur, '%s + %s char' % (cur, length.get()))
+        cur = w.index('%s + %s char' % (cur, length.get()))
 ##proc textSearch {w string tag} {
 ##    $w tag remove search 0.0 end
 ##    if {$string == ""} {
@@ -178,16 +178,17 @@ label = Label(string, text="Search string:", width=13, anchor='w')
 searchString = StringVar()
 entry2 = Entry(string, width=40, textvariable=searchString)
 button = Button(string, text='Highlight',
-                command=lambda t=text, f=textSearch:
-                    f(t, '$searchString', 'search'))
+                command=lambda t=text, var=searchString, f=textSearch:
+                    f(t, var.get(), 'search'))
 label.pack(side='left')
 entry2.pack(side='left')
 button.pack(side='left', pady=5, padx=10)
 entry2.bind('<Return>',
-           lambda e, t=text, f=textSearch: f(t, '$searchString', 'search'))
+           lambda e, t=text, var=searchString, f=textSearch:
+                f(t, var.get(), 'search'))
 entry1.bind('<Return>',
            lambda e, t=text, var=fileName, entry=entry2, f=textLoadFile:
-               f(t, var.get()) and entry.focus())
+               f(t, var.get()) or entry.focus())
 
 ##text $w.text -yscrollcommand "$w.scroll set" -setgrid true
 ##scrollbar $w.scroll -command "$w.text yview"
@@ -226,9 +227,10 @@ text.pack(expand='yes', fill='both')
 ##set fileName ""
 ##set searchString ""
 def textToggle(cmd1, sleep1, cmd2, sleep2):
+    global textToggle
     global w
     cmd1()
-    w.after(sleep1, lambda: textToggle(cmd2, sleep2, cmd1, sleep1))
+    w.after(sleep1, lambda f=textToggle: f(cmd2, sleep2, cmd1, sleep1))
 ##proc textToggle {cmd1 sleep1 cmd2 sleep2} {
 ##    catch {
 ##	eval $cmd1
@@ -236,20 +238,22 @@ def textToggle(cmd1, sleep1, cmd2, sleep2):
 ##    }
 ##}
 if w.winfo_depth() > 1:
-##    textToggle(lambda: text.tag_configure('search', background='#ce5555',
-##                                          foreground='white'),
-##               800,
-##               lambda: text.tag_configure('search', background='',
-##                                          foreground='')
-##               200)
+    textToggle(lambda t=text:
+                   t.tag_configure('search',
+                                   background='#ce5555', foreground='white'),
+               800,
+               lambda t=text:
+                   t.tag_configure('search',
+                                   background='', foreground=''),
+               200)
     pass
 else:
-##    textToggle(lambda: text.tag_configure('search', background='black',
-##                                          foreground='white'),
-##               800,
-##               lambda: text.tag_configure('search', background='',
-##                                          foreground='')
-##               200)
+    textToggle(lambda: text.tag_configure('search', background='black',
+                                          foreground='white'),
+               800,
+               lambda: text.tag_configure('search', background='',
+                                          foreground=''),
+               200)
     pass
 text.insert(1.0,
 """This window demonstrates how to use the tagging facilities in text
