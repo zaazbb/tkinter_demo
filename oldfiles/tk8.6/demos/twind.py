@@ -143,10 +143,19 @@ text.insert('end', " horizontal scrolling and turn back on word wrapping.\n\n")
 ##$t window create end -create {
 ##    button %W.click -text "Click Here" -command "textWindPlot %W" \
 ##	    -cursor top_left_arrow}
+embPlot = dict(lastX=0, lastY=0)
 def embPlotDown(w, x, y):
-    pass
+    global embPlot
+    w.dtag('selected')
+    w.addtag_withtag('selected', 'current')
+    w.tag_raise('current')
+    embPlot['lastX'] = x
+    embPlot['lastY'] = y
 def embPlotMove(w, x, y):
-    pass
+    global embPlot
+    w.move('selected', x-embPlot['lastX'], y-embPlot['lastY'])
+    embPlot['lastX'] = x
+    embPlot['lastY'] = y
 ##set embPlot(lastX) 0
 ##set embPlot(lastY) 0
 ##proc embPlotDown {w x y} {
@@ -164,7 +173,37 @@ def embPlotMove(w, x, y):
 ##    set embPlot(lastY) $y
 ##}
 def createPlot(t):
-    pass
+    global embPlotDown, embPlotMove
+    global c
+    c = Canvas(t, relief='sunken', width=450, height=300,
+               cursor='top_left_arrow')
+    font = 'Helvetica 18'
+    c.create_line(100, 250, 400, 250, width=2)
+    c.create_line(100, 250, 100, 50, width=2)
+    c.create_text(225, 20, text='A Simple Plot', font=font, fill='brown')
+    for i in range(11):
+        x = 100 + i * 30
+        c.create_line(x, 250, x, 245, width=2)
+        c.create_text(x, 254, text=10*i, anchor='n', font=font)
+    for i in range(6):
+        y = 250 - i * 40
+        c.create_line(100, y, 105, y, width=2)
+        c.create_text(96, y, text='%s.0' % i*50, anchor='e', font=font)
+    for point in ((12, 56), (20, 94), (33, 98),
+                  (32, 120), (61, 180), (75, 160), (98, 223)):
+        x = 100 + 3 * point[0]
+        y = 250 - 4 * point[1] / 5
+        item = c.create_oval(x-6, y-6, x+6, y+6,
+                             width=1, outline='black', fill='SkyBlue2')
+        c.addtag_withtag('point', item)
+    c.tag_bind('point', '<Any-Enter>',
+               lambda e: c.itemconfig('current', fill='red'))
+    c.tag_bind('point', '<Any-Leave>',
+           lambda e: c.itemconfig('current', fill='SkyBlue2'))
+    c.tag_bind('point', '<1>', lambda e: embPlotDown(c, e.x, e.y))
+    c.tag_bind('point', '<ButtonRelease-1>', lambda e: c.dtag('selected'))
+    c.bind('<B1-Motion>', lambda e: embPlotMove(c, e.x, e.y))
+    return c
 ##proc createPlot {t} {
 ##    set c $t.c
 ##
@@ -205,8 +244,16 @@ def createPlot(t):
 ##    bind $c <B1-Motion> "embPlotMove $c %x %y"
 ##    return $c
 ##}
-def textWindPlot(w):
-    pass
+def textWindPlot(t):
+    global createPlot
+    if 'c' in globals() and globals()['c'].winfo_exists():
+        return
+    while " \t\n".rfind(t.get('plot')) >= 0:
+        t.delete('plot')
+    t.insert('plot', '\n')
+    t.window_create('plot', window=createPlot(t))
+    t.tag_add('center', 'plot')
+    t.insert('plot', '\n')
 ##proc textWindPlot t {
 ##    set c $t.c
 ##    if {[winfo exists $c]} {
@@ -222,7 +269,8 @@ def textWindPlot(w):
 ##    $t tag add center plot
 ##    $t insert plot "\n"
 ##}
-click = Button(text, text='Click Here', command=lambda w=w: textWindPlot(w),
+click = Button(text, text='Click Here',
+               command=lambda w=text, f=textWindPlot: f(w),
                cursor='top_left_arrow')
 text.insert('end', "Or, here is another example.  If you ")
 text.window_create('end', window=click)
@@ -237,8 +285,13 @@ text.window_create('end', window=click)
 ##	    -cursor top_left_arrow
 ##}
 ##$t insert end " the plot again.\n\n"
-def textWindDel(w):
-    pass
+def textWindDel(t):
+    global c
+    if 'c' in globals() and c.winfo_exists():
+        t.delete(c)
+    while " \t\n".rfind(t.get('plot')) >= 0:
+        t.delete('plot')
+    t.insert('plot', "  ")
 ##proc textWindDel t {
 ##    if {[winfo exists $t.c]} {
 ##	$t delete $t.c
@@ -248,7 +301,8 @@ def textWindDel(w):
 ##	$t insert plot "  "
 ##    }
 ##}
-delete = Button(text, text='Delete', command=lambda w=w: textWindDel(w),
+delete = Button(text, text='Delete',
+                command=lambda w=text, f=textWindDel: f(w),
                 cursor='top_left_arrow')
 text.insert('end', " a canvas displaying an x-y plot will appear right here.")
 text.mark_set('plot', 'insert')
@@ -283,29 +337,29 @@ def create_peer(text, master, name, cnf={}, **kw):
             BaseWidget._setup(self, master, {'name': name})
     text.peer_create('%s.%s' % (master, name), cnf, **kw)
     return textpeer(master, name)
-def textMakePeer(w):
-    pass
+def textMakePeer(parent):
+    n = 1
+    while 'peer%i'%n in globals() and globals()['peer%i'%n].winfo_exists():
+        n += 1
+    w = globals()['peer%i'%n] = Toplevel()
+    w.wm_title('Text Peer #%i' % n)
+    f = Frame(w, highlightthickness=1, borderwidth=1, relief='sunken')
+    t = create_peer(parent, f, 'text', borderwidth=0, highlightthickness=0)
+    t.pack(expand='yes', fill='both')
+    scroll = Scrollbar(w, command=t.yview)
+    t['yscrollcommand'] = scroll.set
+    scroll.pack(side='right', fill='y')
+    f.pack(expand='yes', fill='both')
 def textSplitWindow(textW):
     global text, pane, scroll, w
     global create_peer
     if textW == text:
-        global peer
-##        if peer.winfo_exists():
-##            peer.destroy()
-##        else:
-        try:
-            #print('111')
-            print(w)
-            print(textW)
-            #peer = TextPeer(w, 'text')
-            #print(peer)
-            #textW.peer_create('%s.peer' % w, yscrollcommand=scroll.set)
-            #peer = TextPeer(w, 'peer')
-            peer = create_peer(textW, w, 'peer', yscrollcommand=scroll.set)
-            print(peer)
-            pane.add(peer)
-        except TclError:
-            peer.destroy()
+        global textpeer
+        if 'textpeer' in globals() and textpeer.winfo_exists():
+            textpeer.destroy()
+        else:
+            textpeer = create_peer(textW, w, 'peer', yscrollcommand=scroll.set)
+            pane.add(textpeer)
     else:
         return
 ##proc textMakePeer {parent} {
@@ -336,7 +390,8 @@ def textSplitWindow(textW):
 ##        return
 ##    }
 ##}
-peer = Button(text, text='Make A Peer', command=lambda w=w: textMakePeer(w),
+peer = Button(text, text='Make A Peer',
+              command=lambda w=text, f=textMakePeer: f(w),
               cursor='top_left_arrow')
 split = Button(text, text='Split Windows',
                command=lambda w=text, f=textSplitWindow: f(w),
