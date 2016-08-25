@@ -363,6 +363,7 @@ def invoke(index):
     #               'addSeeDismiss':addSeeDismiss,
     #               'demo_name':demo_name}
     #exec(compile(open(demo_file).read(), demo_file, 'exec'), global_dict, {})
+    print(demo_file)
     exec(open(demo_file).read())
     root.update()
     t['cursor'] = cursor

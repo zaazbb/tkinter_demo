@@ -108,7 +108,81 @@ assert 'widgetDemo' in globals(), \
 ##    incr v(count)
 ##}
 def arrowSetup(c):
-    pass
+    global demo_arrowInfo
+    v = demo_arrowInfo
+    x1 = v['x1']
+    x2 = v['x2']
+    y = v['y']
+    width = v['width']
+    a = v['a']
+    b = v['b']
+    c_ = v['c']
+    bigLineStyle = v['bigLineStyle']
+    boxStyle = v['boxStyle']
+    activeStyle = v['activeStyle']
+    smallTips = v['smallTips']
+    count = v['count']
+
+    tags = c.gettags('current')
+    if tags != '':
+        for tag in tags:
+            if tag.startswith('box'):
+                cur = tag
+                break
+    else:
+        cur = ''
+
+    c.delete_all()
+    c.create_line(x1, y, x2, y, arrow='last',
+        width=10*width, arrowshape=[10*a, 10*b, 10*c_], bigLineStyle)
+    xtip = x2 - 10 * b
+    deltaY = 10 * c_ + 5 * width
+    c.create_line(x2, y, xtip, y-deltaY,
+        x2-10*a, y, xtip, y-deltaY,
+        x2, y, width=2, capstyle='round', joinstyle='round')
+
+    c.create_rectangle(x2-10*a-5, y-5,
+        x2-10*a+5, y+5,
+        tags='box1 box', boxStyle)
+    c.create_rectangle(xtip-5, y-delatY-5,
+        xtip+5, y-deltaY+5,
+        tags='box2 box', boxStyle)
+    c.create_rectangle(x1-5, y-5*width-5,
+        x1+5, y-5*width+5,
+        tags='box3 box', boxStyle)
+    if cur != '':
+        c.itemconfigure(cur, activeStyle)
+
+    c.create_line(x2+50, 0, x2+50, 1000, width=2)
+    tmp = x2 + 100
+    c.create_line(tmp, y-125, tmp, y-75, width=width,
+        arrow=BOTH, arrowshap= ' '.join(a, b, c_))
+    c.create_line(tmp-25, y, tmp+25, y, width=width,
+        arrow=BOTH, arrowshape=' '.join(a, b, c_))
+    c.create_line(tmp-25, y+75, tmp+25, y+125, width=width,
+        arrow=BOTH, arrowshape=' '.join(a, b, c_))
+
+    tmp = x2 + 10
+    c.create_line(tmp, y-5*width, tmp, y-deltaY,
+        arrow=BOTH, arrowShape=smallTips)
+    c.create_text(x2+15, y-deltaY+5*c_, text=c_, anchor=W)
+    tmp = x1 - 10
+    c.create_line(tmp, y-5*width, tmp, y+5*width,
+        arrow=BOTH, arrowshape=smallTips)
+    c.create_text(x1-15, y, text=width, anchor=E)
+    tmp = y+5*width+10*c_+10
+    c.create_line(x2-10*a, tmp, x2, tmp, arrow=BOTH, arrowshape=smallTips)
+    c.create_text(x2-5*a, tmp+5, text=a, anchor=N)
+    tmp = tmp+25
+    c.create_line(x2-10*b, tmp, x2, tmp, arrow=BOTH, arrowshape=smallTips)
+    c.create_text(x2-5*b, tmp+5, text=b, anchor=N)
+
+    c.create_text(x1, 310, text='-width  '+width,
+        anchor=W, font='Helvetica 18')
+    c.create_text(x1, 330, text='-arrowshape  {'+a+'  '+b+'  '+c_+'}',
+        anchor=W, font='Helvetica 18')
+
+    demo_arrowInfo['count'] += 1
 
 ##set w .arrow
 ##catch {destroy $w}
@@ -173,7 +247,19 @@ c.pack(expand='yes', fill='both')
 ##$c bind box <B1-Motion> "\$demo_arrowInfo(motionProc) $c %x %y"
 ##bind $c <Any-ButtonRelease-1> "arrowSetup $c"
 def arrowMove1(c, x, y):
-    pass
+    global demo_arrowInfo
+    v = demo_arrowInfo
+    x2 = v['x2']
+    a = v['a']
+
+    newA = (x2+5-round(c.canvasx(x)))/10
+    if newA < 0:
+        newA = 0
+    if newA > 25:
+        newA = 25
+    if newA != a:
+        c.move('box1', 10*(a-newA), 0)
+        v['a'] = newA
 ##proc arrowMove1 {c x y} {
 ##    upvar #0 demo_arrowInfo v
 ##    set newA [expr {($v(x2)+5-round([$c canvasx $x]))/10}]
@@ -189,7 +275,28 @@ def arrowMove1(c, x, y):
 ##    }
 ##}
 def arrowMove2(c, x, y):
-    pass
+    global demo_arrowInfo
+    v = demo_arrowInfo
+    x2 = v['x2']
+    y_ = v['y']
+    width = v['width']
+    b = v['b']
+    c_ = v['c']
+
+    newB = (x2+5-round(c.canvasx(x)))/10
+    if newB < 0:
+        newB = 0
+    if newB > 25:
+        newB = 25
+    newC = (y_+5-round(c.canvasy(y))-5*width)/10
+    if newC < 0:
+        newC = 0
+    if newC > 20:
+        newC = 20
+    if newB != b or newC != c_:
+        c.move('box2', 10*b-newB, 10*c_-newC)
+        v['b'] = newB
+        v['c'] = newC
 ##proc arrowMove2 {c x y} {
 ##    upvar #0 demo_arrowInfo v
 ##    set newB [expr {($v(x2)+5-round([$c canvasx $x]))/10}]
@@ -215,27 +322,17 @@ def arrowMove2(c, x, y):
 def arrowMove3(c, x, y):
     global demo_arrowInfo
     v = demo_arrowInfo
+    y_ = v['y']
+    width = v['width']
 
-    tags = c.gettags('current')
-    if tags != '':
-        for tag in tags:
-            if tag.startswith('box'):
-                cur = tag
-                break
-    else:
-        cur = ''
-
-    c.delete('all')
-    c.create_line(v['x1'], v['y'], v['x2'], v['y'], arrow='last',
-            width=10*v['width'], 
-            arrowshape='%i %i %i'%(10*v['a'], 10*v['b'], 10*v['c']),
-            v['bigLineStyle'])
-    xtip = v['x2'] - 10 * v['b']
-    deltaY = 10 * v['c'] + 5 * v['width']
-    c.create_line(v['x2'], v['y'], xtip, v['y']+deltaY,
-            v['x']-10*v['a'], v['y'], xtip, v['y']-deltaY,
-            v['x2'], v['y'], width=2, capstyle='round', joinstyle='round')
-
+    newWidth = (y_+2-round(c.canvasy(y)))/5
+    if newWidth < 0:
+        newWidth = 0
+    if newWidth > 20:
+        newWidth = 20
+    if newWidth != width:
+        c.move('box3', 0, 5*(width-newWidth))
+        v['width'] = newWidth
 
 #proc arrowMove3 {c x y} {
 #    upvar #0 demo_arrowInfo v
