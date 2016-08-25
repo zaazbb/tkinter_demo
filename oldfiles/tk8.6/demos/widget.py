@@ -89,7 +89,7 @@ if 'defaultFont' not in root.tk.call('font', 'names'):
 ##set widgetDemo 1
 ##set font mainFont
 widgetDemo = 1
-font_ = mainFont
+font = mainFont
 
 ##image create photo ::img::refresh -format GIF -data {
 ##    R0lGODlhEAAQAJEDAP///wAAACpnKv///yH5BAEAAAMALAAAAAAQABAAAAI63IKp
@@ -363,7 +363,7 @@ def invoke(index):
     #               'addSeeDismiss':addSeeDismiss,
     #               'demo_name':demo_name}
     #exec(compile(open(demo_file).read(), demo_file, 'exec'), global_dict, {})
-    exec(compile(open(demo_file).read(), demo_file, 'exec'), globals(), {})
+    exec(open(demo_file).read())
     root.update()
     t['cursor'] = cursor
     t.tag_add('visited', '%s linestart +1 chars'%index,

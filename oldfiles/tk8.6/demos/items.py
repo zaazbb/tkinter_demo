@@ -53,8 +53,8 @@ c = Canvas(frame, scrollregion='0c 0c 30c 24c', width='15c', height='10c',
            relief='sunken', borderwidth=2)
 vscroll = Scrollbar(frame, command=c.yview)
 hscroll = Scrollbar(frame, orient='horiz', command=c.xview)
-c.xscrollcommand = hscroll.set
-c.yscrollcommand = vscroll.set
+c['xscrollcommand'] = hscroll.set
+c['yscrollcommand'] = vscroll.set
 
 ##grid $c -in $w.frame \
 ##    -row 0 -column 0 -rowspan 1 -columnspan 1 -sticky news
@@ -269,6 +269,9 @@ active = PhotoImage(
 c.create_text ('15c 16.2c', text="Bitmaps and Images", anchor='n')
 c.create_image ('13c 20c', tags='item', image=ousterhout, 
     activeimage=active)
+# keep a reference, to prevent be gced by python.
+c.image_ousterhout = ousterhout
+c.image_active = active
 c.create_bitmap ('17c 18.5c', tags='item', 
 	bitmap='@'+os.path.join(tk_demoDirectory, 'images', 'noletter.xbm'))
 c.create_bitmap ('17c 21.5c', tags='item', 
@@ -294,7 +297,8 @@ def butPress(w, color):
 ##    after 500 "$w delete $i"
 ##}
 c.create_text ('25c 16.2c', text='Windows', anchor='n')
-button = Button(c, text="Press Me", command=lambda: butPress(c, red))
+button = Button(c, text="Press Me",
+                command=lambda c=c, red=red, f=butPress: f(c, red))
 c.create_window ('21c 18c', window=button, anchor='nw', tags='item')
 entry = Entry(c, width='20', relief='sunken')
 entry.insert(END, "Edit this text")
@@ -318,7 +322,32 @@ c.create_text ('28.5c 17.4c', text='Scale:', anchor='s')
 ##bind $c <1> "itemStartDrag $c %x %y"
 ##bind $c <B1-Motion> "itemDrag $c %x %y"
 def itemEnter(c):
-    pass
+    global restoreCmd
+    if c.winfo_depth() == 1:
+        restoreCmd = None
+        return
+    type_ = c.type('current')
+    if type_ == 'window' or type_ == 'image':
+        restoreCmd = None
+        return
+    elif type_ == 'bitmap':
+        bg = c.itemconfig('current', 'background')[4]
+        restoreCmd = lambda: c.itemconfig('current', background=bg)
+        c.itemconfig('current', background='SteelBlue2')
+        return
+    elif type_ == 'image':
+        restoreCmd = lambda: c.itemconfig('current', state='normal')
+        c.itemconfig('current', state='active')
+        return
+    fill = c.itemconfig('current', 'fill')[4]
+    if (type_ == 'rectangle' or type_ == 'oval' or type_ == 'arc') \
+           and fill == '':
+        outline = c.itemconfig('current', 'outline')[4]
+        restoreCmd = lambda: c.itemconfig('current', outline=outline)
+        c.itemconfig('current', outline='SteelBlue2')
+    else:
+        restoreCmd = lambda: c.itemconfig('current', fill=fill)
+        c.itemconfig('current', fill='SteelBlue2')
 ##proc itemEnter {c} {
 ##    global restoreCmd
 ##
@@ -352,7 +381,9 @@ def itemEnter(c):
 ##    }
 ##}
 def itemLeave(c):
-    pass
+    global restoreCmd
+    if restoreCmd:
+        restoreCmd()
 ##proc itemLeave {c} {
 ##    global restoreCmd
 ##
@@ -364,7 +395,10 @@ areaY1 = 0
 areaX2 = 0
 areaY2 = 0
 def itemMark(c, x, y):
-    pass
+    global areaX1, areaY1
+    areaX1 = c.canvasx(x)
+    areaY1 = c.canvasx(y)
+    c.delete('area')
 ##proc itemMark {c x y} {
 ##    global areaX1 areaY1
 ##    set areaX1 [$c canvasx $x]
@@ -372,7 +406,15 @@ def itemMark(c, x, y):
 ##    $c delete area
 ##}
 def itemStroke(c, x, y):
-    pass
+    global areaX1, areaY1, areaX2, areaY2
+    x = c.canvasx(x)
+    y = c.canvasx(y)
+    if areaX1 != x and areaY1 != y:
+        c.delete('area')
+        c.addtag_withtag(
+            'area', c.create_rectangle(areaX1, areaY1, x, y, outline='black'))
+        areaX2 = x
+        areaY2 = y
 ##proc itemStroke {c x y} {
 ##    global areaX1 areaY1 areaX2 areaY2
 ##    set x [$c canvasx $x]
@@ -386,7 +428,18 @@ def itemStroke(c, x, y):
 ##    }
 ##}
 def itemsUnderArea(c):
-    pass
+    global areaX1, areaY1, areaX2, areaY2
+    area = c.find_withtag('area')
+    items = []
+    for i in c.find_enclosed(areaX1, areaY1, areaX2, areaY2):
+        if 'item' in c.gettags(i):
+            items.append(i)
+    print("Items enclosed by area: ", items)
+    items = []
+    for i in c.find_overlapping(areaX1, areaY1, areaX2, areaY2):
+        if 'item' in c.gettags(i):
+            items.append(i)
+    print("Items overlapping area: ", items)
 ##proc itemsUnderArea {c} {
 ##    global areaX1 areaY1 areaX2 areaY2
 ##    set area [$c find withtag area]
@@ -406,14 +459,21 @@ def itemsUnderArea(c):
 ##    puts stdout "Items overlapping area: $items"
 ##}
 def itemStartDrag(c, x, y):
-    pass
+    global lastX, lastY
+    lastX = c.canvasx(x)
+    lastY = c.canvasx(y)
 ##proc itemStartDrag {c x y} {
 ##    global lastX lastY
 ##    set lastX [$c canvasx $x]
 ##    set lastY [$c canvasy $y]
 ##}
 def itemDrag(c, x, y):
-    pass
+    global lastX, lastY
+    x = c.canvasx(x)
+    y = c.canvasx(y)
+    c.move('current', x-lastX, y-lastY)
+    lastX = x
+    lastY = y
 ##proc itemDrag {c x y} {
 ##    global lastX lastY
 ##    set x [$c canvasx $x]
@@ -422,15 +482,16 @@ def itemDrag(c, x, y):
 ##    set lastX $x
 ##    set lastY $y
 ##}
-c.tag_bind('item', '<Any-Enter>', lambda e, f=itemEnter, c=c: f(c))
-c.tag_bind('item', '<Any-Leave>', lambda e, f=itemLeave, c=c: f(c))
+globals().update(locals())
+c.tag_bind('item', '<Any-Enter>', lambda e: itemEnter(c))
+c.tag_bind('item', '<Any-Leave>', lambda e: itemLeave(c))
 c.bind('<2>', lambda e: c.scan_mark(e.x, e.y))
 c.bind('<B2-Motion>', lambda e: c.scan_dragto(e.x, e.y))
-c.bind('<3>', lambda e, f=itemMark, c=c: f(c, e.x, e.y))
-c.bind('<B3-Motion>', lambda e, f=itemStroke, c=c: f(c, e.x, e.y))
-c.bind('<<NextChar>>', lambda e, f=itemsUnderArea, c=c: f(c))
-c.bind('<1>', lambda e, f=itemStartDrag, c=c: f(c, e.x, e.y))
-c.bind('<B1-Motion>', lambda e, f=itemDrag, c=c: f(c, e.x, e.y))
+c.bind('<3>', lambda e: itemMark(c, e.x, e.y))
+c.bind('<B3-Motion>', lambda e: itemStroke(c, e.x, e.y))
+c.bind('<<NextChar>>', lambda e: itemsUnderArea(c))
+c.bind('<1>', lambda e: itemStartDrag(c, e.x, e.y))
+c.bind('<B1-Motion>', lambda e: itemDrag(c, e.x, e.y))
 
 # Utility procedures for highlighting the item under the pointer:
 
