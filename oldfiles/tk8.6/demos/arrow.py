@@ -124,17 +124,16 @@ def arrowSetup(c):
     count = v['count']
 
     tags = c.gettags('current')
-    if tags != '':
+    cur = ''
+    if tags:
         for tag in tags:
             if tag.startswith('box'):
                 cur = tag
                 break
-    else:
-        cur = ''
 
-    c.delete_all()
+    c.delete('all')
     c.create_line(x1, y, x2, y, arrow='last',
-        width=10*width, arrowshape=[10*a, 10*b, 10*c_], bigLineStyle)
+        width=10*width, arrowshape=(10*a, 10*b, 10*c_), **bigLineStyle)
     xtip = x2 - 10 * b
     deltaY = 10 * c_ + 5 * width
     c.create_line(x2, y, xtip, y-deltaY,
@@ -143,28 +142,28 @@ def arrowSetup(c):
 
     c.create_rectangle(x2-10*a-5, y-5,
         x2-10*a+5, y+5,
-        tags='box1 box', boxStyle)
-    c.create_rectangle(xtip-5, y-delatY-5,
+        tags='box1 box', **boxStyle)
+    c.create_rectangle(xtip-5, y-deltaY-5,
         xtip+5, y-deltaY+5,
-        tags='box2 box', boxStyle)
+        tags='box2 box', **boxStyle)
     c.create_rectangle(x1-5, y-5*width-5,
         x1+5, y-5*width+5,
-        tags='box3 box', boxStyle)
+        tags='box3 box', **boxStyle)
     if cur != '':
-        c.itemconfigure(cur, activeStyle)
+        c.itemconfigure(cur, **activeStyle)
 
     c.create_line(x2+50, 0, x2+50, 1000, width=2)
     tmp = x2 + 100
     c.create_line(tmp, y-125, tmp, y-75, width=width,
-        arrow=BOTH, arrowshap= ' '.join(a, b, c_))
+        arrow=BOTH, arrowshap=(a, b, c_))
     c.create_line(tmp-25, y, tmp+25, y, width=width,
-        arrow=BOTH, arrowshape=' '.join(a, b, c_))
+        arrow=BOTH, arrowshape=(a, b, c_))
     c.create_line(tmp-25, y+75, tmp+25, y+125, width=width,
-        arrow=BOTH, arrowshape=' '.join(a, b, c_))
+        arrow=BOTH, arrowshape=(a, b, c_))
 
     tmp = x2 + 10
     c.create_line(tmp, y-5*width, tmp, y-deltaY,
-        arrow=BOTH, arrowShape=smallTips)
+        arrow=BOTH, arrowshape=smallTips)
     c.create_text(x2+15, y-deltaY+5*c_, text=c_, anchor=W)
     tmp = x1 - 10
     c.create_line(tmp, y-5*width, tmp, y+5*width,
@@ -177,12 +176,13 @@ def arrowSetup(c):
     c.create_line(x2-10*b, tmp, x2, tmp, arrow=BOTH, arrowshape=smallTips)
     c.create_text(x2-5*b, tmp+5, text=b, anchor=N)
 
-    c.create_text(x1, 310, text='-width  '+width,
+    c.create_text(x1, 310, text='-width  '+str(width),
         anchor=W, font='Helvetica 18')
-    c.create_text(x1, 330, text='-arrowshape  {'+a+'  '+b+'  '+c_+'}',
-        anchor=W, font='Helvetica 18')
+    c.create_text(x1, 330,
+                  text='-arrowshape  {'+str(a)+'  '+str(b)+'  '+str(c_)+'}',
+                  anchor=W, font='Helvetica 18')
 
-    demo_arrowInfo['count'] += 1
+    v['count'] += 1
 
 ##set w .arrow
 ##catch {destroy $w}
@@ -351,25 +351,30 @@ def arrowMove3(c, x, y):
 demo_arrowInfo = dict(a=8, b=10, c=3, width=2, motionProc='arrowMoveNull',
         x1=40, x2=350, y=150, smallTips='5 5 2', count=0)
 if c.winfo_depth() > 1:
-    demo_arrowInfo['bigLineStyle'] = "-fill SkyBlue1"
-    demo_arrowInfo['boxStyle'] = "-fill {} -outline black -width 1"
-    demo_arrowInfo['activeStyle'] = "-fill red -outline black -width 1"
+    demo_arrowInfo['bigLineStyle'] = dict(fill="SkyBlue1")
+    demo_arrowInfo['boxStyle'] = dict(fill='', outline='black', width=1)
+    demo_arrowInfo['activeStyle'] = dict(fill='red', outline='black', width=1)
 else:
-    demo_arrowInfo['bigLineStyle'] = "-fill black " \
-	    + "-stipple @[file join $tk_demoDirectory images grey.25]"
-    demo_arrowInfo['boxStyle'] = "-fill {} -outline black -width 1"
-    demo_arrowInfo['activeStyle'] = "-fill black -outline black -width 1"
+    demo_arrowInfo['bigLineStyle'] = \
+        dict(fill='black', stipple=tk_demoDirectory+'/images/grey.25')
+    demo_arrowInfo['boxStyle'] = dict(fill='', outline='black', width=1)
+    demo_arrowInfo['activeStyle'] = dict(fill='black', outline='black', width=1)
 arrowSetup(c)
+globals().update(locals())
 c.tag_bind ('box', '<Enter>', 
     lambda e: c.itemconfigure ('current', demo_arrowInfo['activeStyle']))
 c.tag_bind ('box', '<Leave>', 
     lambda e: c.itemconfigure ('current', demo_arrowInfo['boxStyle']))
 c.tag_bind ('box', '<B1-Enter>', " ")
 c.tag_bind ('box', '<B1-Leave>', " ")
-c.tag_bind ('box1', '<1>', lambda e: demo_arrowInfo['motionProc'] = arrowMove1)
-c.tag_bind ('box2', '<1>', lambda e: demo_arrowInfo['motionProc'] = arrowMove2)
-c.tag_bind ('box3', '<1>', lambda e: demo_arrowInfo['motionProc'] = arrowMove3)
-c.tag_bind ('box', '<B1-Motion>', lambda e: demo_arrowInfo['motionProc'] (c, e.x, e.y))
+c.tag_bind ('box1', '<1>',
+            lambda e: demo_arrowInfo.update(motionProc=arrowMove1))
+c.tag_bind ('box2', '<1>',
+            lambda e: demo_arrowInfo.update(motionProc=arrowMove2))
+c.tag_bind ('box3', '<1>',
+            lambda e: demo_arrowInfo.update(motionProc=arrowMove3))
+c.tag_bind ('box', '<B1-Motion>',
+            lambda e: demo_arrowInfo['motionProc'] (c, e.x, e.y))
 c.bind ('<Any-ButtonRelease-1>', lambda e: arrowSetup (c))
 
 # arrowMove1 --
