@@ -35,6 +35,15 @@
 ##    }
 ##    return $moves
 ##}
+def ValidMoves(square):
+    moves = []
+    for pair in ((-1, -2), (-2, -1), (-2, 1), (-1, 2),
+                 (1, 2), (2, 1), (2, -1), (1, -2)):
+        col = square % 8 + pair[0]
+        row = square // 8 + pair[1]
+        if row > -1 and row < 8 and col > -1 and col < 8:
+            moves.append(row * 8 + col)
+    return moves
 
 # Return the number of available moves for this square
 ##proc CheckSquare {square} {
@@ -47,6 +56,13 @@
 ##    }
 ##    return $moves
 ##}
+def CheckSquare(square):
+    global visited
+    moves = 0
+    for test in ValidMoves(square):
+        if test not in visited:
+            moves += 1
+    return moves
 
 # Select the next square to move to. Returns -1 if there are no available
 # squares remaining that we can move to.
@@ -69,6 +85,19 @@
 ##    }
 ##    return $nextSquare
 ##}
+def Next(square):
+    global visited
+    minimum = 9
+    nextSquare = -1
+    for testSquare in ValidMoves(square):
+        if testSquare not in visited:
+            count = CheckSquare(testSquare)
+            if count < minimum:
+                minimum = count
+                nextSquare = testSquare
+            elif count == minimum:
+                nextSquare = Edgemost(nextSquare, testSquare)
+    return nextSquare
 
 # Select the square nearest the edge of the board
 ##proc Edgemost {a b} {
@@ -78,14 +107,20 @@
 ##    set rowB [expr {3-int(abs(3.5-($b/8)))}]
 ##    return [expr {($colA * $rowA) < ($colB * $rowB) ? $a : $b}]
 ##}
+def Edgemost(a, b):
+    colA = 3-int(abs(3.5-(a%8)))
+    colB = 3-int(abs(3.5-(b%8)))
+    rowA = 3-int(abs(3.5-(a/8)))
+    rowB = 3-int(abs(3.5-(b/8)))
+    return a if colA * rowA < colB * rowB else b
 
 # Display a square number as a standard chess square notation.
 ##proc N {square} {
 ##    return [format %c%d [expr {97 + $square % 8}] \
-##                [expr {$square / 8 + 1}]]
+##                [expr {$square // 8 + 1}]]
 ##}
-def N(square):
-    pass
+def N_(square):
+    return chr(97 + square % 8) + str(square // 8 + 1)
 
 # Perform a Knight's move and schedule the next move.
 ##proc MovePiece {dlg last square} {
@@ -121,9 +156,10 @@ def N(square):
 ##}
 def MovePiece(ws, last, square):
     global visited, delay, continuous
-    txt, c, b1 = *ws
+    txt, c, b1 = ws[0], ws[1], ws[2]
     txt.insert(END,
-               str(len(visited))+'. '+str(N(last))+' .. '+str(N(square))+'\n')
+               str(len(visited))+'. '+N_(last)+' .. '+N_(square)+'\n',
+               '')
     txt.see(END)
     c.itemconfigure(1+last, state='normal', outline='black')
     c.itemconfigure(1+square, state='normal', outline='red')
@@ -131,7 +167,9 @@ def MovePiece(ws, last, square):
     visited.append(square)
     next = Next(square)
     if next != -1:
-        aid = c.after(delay, lambda: MovePiece(ws, square, next))
+        global aid
+        global dlg
+        aid = dlg.after(delay.get(), lambda: MovePiece(ws, square, next))
     else:
         b1['state'] = 'normal'
         if len(visited) == 64:
@@ -139,10 +177,10 @@ def MovePiece(ws, last, square):
             if initial == square:
                 txt.insert(END, 'Closed tour!')
             else:
-                txt.insert(END, 'Success\n')
-                if continuous:
-                    c.after(delay * 2,
-                            lambda: Tour(ws, int(random.random() * 64)))
+                txt.insert(END, 'Success\n', '')
+                if continuous.get():
+                    c.after(delay.get() * 2,
+                            lambda: Tour(ws, int(random() * 64)))
         else:
             txt.insert(END, 'FAILED!\n')
 
@@ -164,14 +202,15 @@ def MovePiece(ws, last, square):
 def Tour(ws, square=None):
     global visited
     visited = []
-    txt, c, b1 = *ws
+    txt, c, b1 = ws[0], ws[1], ws[2]
     txt.delete(1.0, END)
     b1['state'] = 'disabled'
     for n in range(64):
-        c.itemconfigure(state='disabled', outline='black')
+        c.itemconfigure(n, state='disabled', outline='black')
     if square == None:
         coords = c.coords('knight')[:2]
-        square = c.find_closest(*coords, 0, 65) - 1
+        square = c.find_closest(*coords, 0, 65)[0] - 1
+    global initial
     initial = square
     c.after_idle(lambda: MovePiece(ws, initial, initial))
 
@@ -199,7 +238,7 @@ def Exit(dlg):
 ##}
 def SetDelay(new):
     global delay
-    delay.set(new)
+    delay.set(int(float(new)))
 
 ##proc DragStart {w x y} {
 ##    $w dtag selected
@@ -220,6 +259,22 @@ def SetDelay(new):
 ##    $w dtag selected
 ##    variable dragging ; unset dragging
 ##}
+def DragStart(w, x, y):
+    w.dtag('selected')
+    w.addtag_withtag('selected', 'current')
+    global dragging
+    dragging = (x, y)
+def DragMotion(w, x, y):
+    if 'dragging' in globals():
+        global dragging
+        w.move('selected', x - dragging[0], y - dragging[1])
+        dragging = (x, y)
+def DragEnd(w, x, y):
+    square = w.find_closest(x, y, 0, 65)
+    w.moveto('selected', *w.coords(square)[:2])
+    w.dtag('selected')
+    global dragging
+    del dragging
 
 ##proc CreateGUI {} {
 ##    catch {destroy .knightstour}
@@ -310,18 +365,7 @@ def SetDelay(new):
 ##    wm deiconify $dlg
 ##    tkwait window $dlg
 ##}
-
-##if {![winfo exists .knightstour]} {
-##    if {![info exists widgetDemo]} { wm withdraw . }
-##    set r [catch [linsert $argv 0 CreateGUI] err]
-##    if {$r} {
-##	tk_messageBox -icon error -title "Error" -message $err
-##    }
-##    if {![info exists widgetDemo]} { exit $r }
-##}
 def CreateGUI():
-    import random
-
     class MyCavas(Canvas):
         def moveto(self, tagOrId, xPos, yPos):
             self.tk.call(self._w, 'moveto', tagOrId, xPos, yPos)
@@ -330,6 +374,7 @@ def CreateGUI():
         knightstour.destroy()
     except:
         pass
+    global dlg
     dlg = knightstour = Toplevel(root)
     dlg.wm_title('Knights tour')
     dlg.wm_withdraw()
@@ -339,7 +384,7 @@ def CreateGUI():
     vs = ttk.Scrollbar(f, command=txt.yview)
     txt['yscrollcommand'] = vs.set
 
-    global delay
+    global delay, continuous
     delay = IntVar(value=600)
     continuous = IntVar(value=0)
     tf = ttk.Frame(dlg)
@@ -372,7 +417,7 @@ def CreateGUI():
                '2 17    4 14   5 15    3 17   5 17   9 14  10 15  5 21')
         c.create_polygon(pts, tag='knight', offset=8,
                          fill='black', activefill='#600000')
-    c.moveto('knight', *c.coords(int(1 + random.random() * 64))[:2]) 
+    c.moveto('knight', *c.coords(int(1 + random() * 64))[:2]) 
     c.tag_bind('knight', '<ButtonPress-1>',
                lambda e: DragStart(e.widget, e.x, e.y))
     c.tag_bind('knight', '<Motion>', lambda e: DragMotion(e.widget, e.x, e.y))
@@ -400,7 +445,7 @@ def CreateGUI():
         things[-1].pack_configure(padx=(16, 4))
     tf.grid(sticky='ew', columnspan=6)
     if 'widgetDemo' in globals():
-        addSeeDismiss(ttk.Frame(w), demo_name).grid(sticky='ew', columnspan=6)
+        addSeeDismiss(ttk.Frame(dlg), demo_name).grid(sticky='ew', columnspan=6)
 
     dlg.grid_rowconfigure(0, weight=1)
     dlg.grid_columnconfigure(0, weight=1)
@@ -413,13 +458,26 @@ def CreateGUI():
 
     dlg.wm_deiconify()
     dlg.wait_window()
+
+##if {![winfo exists .knightstour]} {
+##    if {![info exists widgetDemo]} { wm withdraw . }
+##    set r [catch [linsert $argv 0 CreateGUI] err]
+##    if {$r} {
+##	tk_messageBox -icon error -title "Error" -message $err
+##    }
+##    if {![info exists widgetDemo]} { exit $r }
+##}
     
 if 'knightstour' not in globals() \
         or not globals()['knightstour'].winfo_exists():
     from tkinter import *
     from tkinter import ttk
     from tkinter.font import Font
-    if 'widgetDemo' not in globals():
+    from random import random
+    
+    if 'widgetDemo' in globals():
+        globals().update(locals())
+    else:
         root = Tk()
         root.wm_withdraw()
     try:

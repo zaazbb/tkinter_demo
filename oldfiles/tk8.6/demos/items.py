@@ -10,7 +10,6 @@ assert 'widgetDemo' in globals(), \
 'This script should be run from the "widget" demo.'
 
 ##package require Tk
-from tkinter import *
 
 ##set w .items
 ##catch {destroy $w}
@@ -29,7 +28,7 @@ positionWindow(w)
 
 ##label $w.msg -font $font -wraplength 5i -justify left -text "This window contains a canvas widget with examples of the various kinds of items supported by canvases.  The following operations are supported:\n  Button-1 drag:\tmoves item under pointer.\n  Button-2 drag:\trepositions view.\n  Button-3 drag:\tstrokes out area.\n  Ctrl+f:\t\tprints items under area."
 ##pack $w.msg -side top
-msg = Label(w, font=font_, wraplength='5i', justify='left', text="This window contains a canvas widget with examples of the various kinds of items supported by canvases.  The following operations are supported:\n  Button-1 drag:\tmoves item under pointer.\n  Button-2 drag:\trepositions view.\n  Button-3 drag:\tstrokes out area.\n  Ctrl+f:\t\tprints items under area.")
+msg = Label(w, font=font, wraplength='5i', justify='left', text="This window contains a canvas widget with examples of the various kinds of items supported by canvases.  The following operations are supported:\n  Button-1 drag:\tmoves item under pointer.\n  Button-2 drag:\trepositions view.\n  Button-3 drag:\tstrokes out area.\n  Ctrl+f:\t\tprints items under area.")
 msg.pack(side='top')
 
 ## See Code / Dismiss buttons
