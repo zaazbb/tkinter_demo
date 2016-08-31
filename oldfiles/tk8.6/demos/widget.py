@@ -799,10 +799,11 @@ t.focus()
 ##    }
 ##    return $w
 ##}
-def showVars(dlg, args):
-    try: dlg[1].destroy()
+def showVars(master, *args):
+    global vardlg
+    try: vardlg.destroy()
     except: pass
-    w = dlg[1] = Toplevel(dlg[0])
+    w = vardlg = Toplevel(master)
     if root._windowingsystem == 'x11': pass
     w.wm_title('Variable values')
 
@@ -840,10 +841,9 @@ def addSeeDismiss(w, show, vars_=[], extra=[]):
                                 % (sys.exec_prefix, show)))
     buttons = [code, dismiss]
     if vars_:
-        dialog = None
         vars_btn = ttk.Button(w, text='See Variables', image=img_view,
                               compound='left',
-                              command=lambda dlg=[w,dialog]:showVars(dlg, vars_))
+                              command=lambda: showVars(w, *vars_))
         buttons.insert(0, vars_btn)
     if extra:
         #extra[0].configure(master=w)

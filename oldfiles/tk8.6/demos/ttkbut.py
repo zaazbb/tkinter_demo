@@ -11,7 +11,6 @@ assert 'widgetDemo' in globals(), \
 'This script should be run from the "widget" demo.'
 
 ##package require Tk
-from tkinter import *
 
 ##set w .ttkbut
 ##catch {destroy $w}
@@ -29,7 +28,7 @@ positionWindow(w)
 
 ##ttk::label $w.msg -font $font -wraplength 4i -justify left -text "Ttk is the new Tk themed widget set. This is a Ttk themed label, and below are three groups of Ttk widgets in Ttk labelframes. The first group are all buttons that set the current application theme when pressed. The second group contains three sets of checkbuttons, with a separator widget between the sets. Note that the \u201cEnabled\u201d button controls whether all the other themed widgets in this toplevel are in the disabled state. The third group has a collection of linked radiobuttons."
 ##pack $w.msg -side top -fill x
-msg = ttk.Label(w, font=font_, wraplength='4i', justify='left', text="Ttk is the new Tk themed widget set. This is a Ttk themed label, and below are three groups of Ttk widgets in Ttk labelframes. The first group are all buttons that set the current application theme when pressed. The second group contains three sets of checkbuttons, with a separator widget between the sets. Note that the \u201cEnabled\u201d button controls whether all the other themed widgets in this toplevel are in the disabled state. The third group has a collection of linked radiobuttons.")
+msg = ttk.Label(w, font=font, wraplength='4i', justify='left', text="Ttk is the new Tk themed widget set. This is a Ttk themed label, and below are three groups of Ttk widgets in Ttk labelframes. The first group are all buttons that set the current application theme when pressed. The second group contains three sets of checkbuttons, with a separator widget between the sets. Note that the \u201cEnabled\u201d button controls whether all the other themed widgets in this toplevel are in the disabled state. The third group has a collection of linked radiobuttons.")
 msg.pack(side='top', fill='x')
 
 ## See Code / Dismiss
