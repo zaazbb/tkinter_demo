@@ -10,7 +10,6 @@ assert 'widgetDemo' in globals(), \
 'This script should be run from the "widget" demo.'
 
 ##package require Tk
-from tkinter import *
 
 ##set w .label
 ##catch {destroy $w}
@@ -28,7 +27,7 @@ positionWindow(w)
 
 ##label $w.msg -font $font -wraplength 4i -justify left -text "Five labels are displayed below: three textual ones on the left, and an image label and a text label on the right.  Labels are pretty boring because you can't do anything with them."
 ##pack $w.msg -side top
-msg = Label(w, font=font_, wraplength='4i', justify='left', text="Five labels are displayed below: three textual ones on the left, and an image label and a text label on the right.  Labels are pretty boring because you can't do anything with them.")
+msg = Label(w, font=font, wraplength='4i', justify='left', text="Five labels are displayed below: three textual ones on the left, and an image label and a text label on the right.  Labels are pretty boring because you can't do anything with them.")
 msg.pack(side='top')
 
 ## See Code / Dismiss buttons
