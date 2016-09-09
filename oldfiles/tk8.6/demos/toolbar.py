@@ -65,8 +65,7 @@ to2.pack(fill=Y, expand=1, side=LEFT)
 contents = ttk.Frame(t)
 tearoff.grid(sticky='nsew')
 contents.grid(sticky='nsew', row=0, column=1)
-t.grid_columnconfigure(weight=1)
-contents.grid_columnconfigure(weight=1)
+t.grid_columnconfigure(contents, weight=1)
 contents.grid_columnconfigure(1000, weight=1)
 
 ## Bindings so that the toolbar can be torn off and reattached
@@ -87,7 +86,7 @@ contents.grid_columnconfigure(1000, weight=1)
 ##    grid $w.tearoff
 ##    grid $w
 ##}
-def tearoff(w, x, y):
+def tearoff_(w, x, y):
     if root.winfo_containing(x, y).startswith(w):
         return
     w.grid_remove()
@@ -98,9 +97,9 @@ def untearoff(w):
     w.wm_forget()
     tearoff.grid()
     w.grid()
-tearoff.bind('<B1-Motion>', lambda e: tearoff(t, e.x, e.y))
-to.bind('<B1-Motion>', lambda e: tearoff(t, e.x, e.y))
-to2.bind('<B1-Motion>', lambda e: tearoff(t, e.x, e.y))
+tearoff.bind('<B1-Motion>', lambda e: tearoff_(t, e.x, e.y))
+to.bind('<B1-Motion>', lambda e: tearoff_(t, e.x, e.y))
+to2.bind('<B1-Motion>', lambda e: tearoff_(t, e.x, e.y))
 
 #### Toolbar contents
 ##ttk::button $t.button -text "Button" -style Toolbutton -command [list \
@@ -124,19 +123,23 @@ checkvar = StringVar()
 check = ttk.Checkbutton(t, text='Check', variable=checkvar, style='Toolbutton',
     command=lambda: txt.insert(END, "check is "+checkvar.get()+"\n"))
 menu = ttk.Menubutton(t, text='Menu')
-combo = ttk.Combobox(t, value=font_families(), state='readonly')
+from tkinter.font import families
+combo = ttk.Combobox(t, value=sorted(families()), state='readonly')
 menu['menu'] = m = Menu(menu)
 m.add_command(label='Just', command=lambda: txt.insert(END, 'Just\n'))
 m.add_command(label='An', command=lambda: txt.insert(END, 'An\n'))
 m.add_command(label='Example', command=lambda: txt.insert(END, 'Example\n'))
 def changeFont(txt, combo):
-    txt.configure(font=combo.get()+' 10')
-combo.bind('<<ComboboxSelected>>', lambda: changeFont(txt, combo))
+    fname = combo.get()
+    if ' ' in fname:
+        fname = '{' + fname + '}'
+    txt.configure(font=fname+' 10')
+combo.bind('<<ComboboxSelected>>', lambda e: changeFont(txt, combo))
 
 #### Some content for the rest of the toplevel
 ##text $w.txt -width 40 -height 10
 ##interp alias {} doInsert {} $w.txt insert end	;# Make bindings easy to write
-txt = Text(width=40, height=10)
+txt = Text(w, width=40, height=10)
 
 #### Arrange contents
 ##grid $t.button $t.check $t.menu $t.combo -in $t.contents -padx 2 -sticky ns
@@ -146,21 +149,22 @@ txt = Text(width=40, height=10)
 ##grid $w.txt -sticky nsew
 ##grid rowconfigure $w $w.txt -weight 1
 ##grid columnconfigure $w $w.txt -weight 1
-for i, w in enumerate(button, check, menu, combo):
-    w.grid(in=contents, padx=2, sticky='ns', row=0, column=i)
+for i, ww in enumerate((button, check, menu, combo)):
+    ww.grid(in_=contents, padx=2, sticky='ns', row=0, column=i)
 t.grid(sticky='ew')
 sep.grid(sticky='ew')
 msg.grid(sticky='ew')
-txt.grid(sticky='ew')
-w.grid_rowconfigure(weight=1)
-txt.grid_rowconfigure(weight=1)
-w.grid_columnconfigure(weight=1)
-txt.grid_columnconfigure(weight=1)
+txt.grid(sticky='nsew')
+w.grid_rowconfigure(txt, weight=1)
+w.grid_columnconfigure(txt, weight=1)
 
 ## See Code / Dismiss buttons
 ##set btns [addSeeDismiss $w.buttons $w]
 ##grid $btns -sticky ew
-##btns = addSeeDismiss(ttk.Frame(w), demo_name)
-##btns.pack(sticky='ew')
 btns = addSeeDismiss(ttk.Frame(w), demo_name)
-btns.pack(sticky='ew')
+btns.grid(sticky='ew')
+
+locals_ = locals()
+del locals_['t']
+globals().update(locals_)
+
