@@ -1,0 +1,128 @@
+# --Frame
+
+# Frames are primarily used as a container for other widgets.
+frame = ttk.Frame(parent)
+
+# "padding" - extra space around the inside of the widget;
+# two numbers specify the horizontal and the vertical padding.
+# four numbers specify the left, top, right and bottom padding.
+frame['padding'] = (5,10)
+
+# "relief" - specifies the visual appearance of the border:
+# "flat" (default), "raised", "sunken", "solid", "ridge", or "groove".
+frame['borderwidth'] = 2
+frame['relief'] = 'sunken'
+
+# --Label
+
+label = ttk.Label(parent, text='Full name:')
+
+# Displaying Text
+resultsContents = StringVar()
+label['textvariable'] = resultsContents
+resultsContents.set('New value to display')
+
+# Displaying Images
+image = PhotoImage(file='myimage.gif')
+label['image'] = image
+
+# Layout
+# "anchor" - specify what edge or corner the label should be attached to.
+# "n", "ne", "e", "se", "s", "sw", "w", "nw" or "center".
+# "justify" -  how the text is justified. "left", "center" or "right".
+
+# --Button
+
+button = ttk.Button(parent, text='Okay', command=submitForm)
+
+# The Command Callback
+# ask the button to invoke the command callback from your application.
+button.invoke()
+
+# Button State
+# set the disabled flag, disabling the button
+button.state(['disabled'])
+# clear the disabled flag
+button.state(['!disabled'])
+# return true if the button is disabled, else false
+button.instate(['disabled'])
+# return true if the button is not disabled, else false
+button.instate(['!disabled'])
+# execute 'cmd' if the button is not disabled
+button.instate(['!disabled'], cmd)    
+
+# --Checkbutton
+
+measureSystem = StringVar()
+check = ttk.Checkbutton(parent, text='Use Metric', 
+	    command=metricChanged, variable=measureSystem,
+	    onvalue='metric', offvalue='imperial')
+
+# Widget Value
+# check state "tristate" or indeterminate mode;
+check.instate(['alternate'])
+
+# --Radiobutton
+
+# have the same linked variable, but a different value;
+phone = StringVar()
+home = ttk.Radiobutton(parent, text='Home', variable=phone, value='home')
+office = ttk.Radiobutton(parent, text='Office', variable=phone, value='office')
+cell = ttk.Radiobutton(parent, text='Mobile', variable=phone, value='cell')
+
+# --Entry
+
+username = StringVar()
+name = ttk.Entry(parent, textvariable=username)
+
+print('current value is %s' % name.get())
+name.delete(0,'end')         ; # delete between two indices, 0-based
+name.insert(0, 'your name')  ; # insert new text at a given index
+
+# Passwords
+# Entries used for passwords, set the "show" option to the character, eg. "*".
+
+# --Combobox
+
+countryvar = StringVar()
+country = ttk.Combobox(parent, textvariable=countryvar)
+
+country.bind('<<ComboboxSelected>>', function)
+
+# Predefined Values
+country['values'] = ('USA', 'Canada', 'Australia')
+
+# --Listbox
+
+l = Listbox(parent, height=10)
+
+# --Scrollbar
+
+s = ttk.Scrollbar( parent, orient=VERTICAL, command=listbox.yview)
+listbox.configure(yscrollcommand=s.set)
+
+# --SizeGrip
+
+# This is the little box at the bottom right corner of the window
+# that allows you to resize it.
+
+ttk.Sizegrip(parent).grid(column=999, row=999, sticky=(S,E))
+
+# --Text
+
+t = Text(parent, width=40, height=10)
+
+# --Progressbar
+
+p = ttk.Progressbar(parent, orient=HORIZONTAL, length=200, mode='determinate')
+
+# --Scale
+
+s = ttk.Scale(parent, orient=HORIZONTAL, length=200, from_=1.0, to=100.0)
+
+# --Spinbox
+
+spinval = StringVar()
+s = Spinbox(parent, from_=1.0, to=100.0, textvariable=spinval)
+
+

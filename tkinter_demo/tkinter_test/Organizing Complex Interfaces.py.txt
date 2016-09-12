@@ -1,0 +1,34 @@
+
+# --Separator
+
+s = ttk.Separator(parent, orient=HORIZONTAL)
+
+# --Label Frames
+
+lf = ttk.Labelframe(parent, text='Label')
+
+# --Paned Windows
+p = ttk.Panedwindow(parent, orient=VERTICAL)
+# first pane, which would get widgets gridded into it:
+f1 = ttk.Labelframe(p, text='Pane1', width=100, height=100)
+f2 = ttk.Labelframe(p, text='Pane2', width=100, height=100); # second pane
+p.add(f1)
+p.add(f2)
+
+# --Notebook
+n = ttk.Notebook(parent)
+f1 = ttk.Frame(n); # first page, which would get widgets gridded into it
+f2 = ttk.Frame(n); # second page
+n.add(f1, text='One')
+n.add(f2, text='Two')
+
+
+
+##        To retrieve the subwindow that is currently selected,
+##    call the "select" method, and change the selected tab by passing it
+##    either the tab's position or the subwindow itself as a parameter.
+##
+##        To change a tab option (like the text label on the tab or its state),
+##    you can use the "tab(tabid, option=value" method
+##    (where "tabid" is again the tab's position or subwindow);
+##    omit the "=value" to return the current value of the option.

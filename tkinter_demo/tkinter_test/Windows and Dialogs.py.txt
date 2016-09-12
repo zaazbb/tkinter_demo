@@ -1,0 +1,103 @@
+
+# Creating and Destroying Windows
+t = Toplevel(parent)
+
+window.destroy()
+
+# Changing Window Behavior and Styles
+# Window Title
+oldtitle = window.title()
+window.title('New title')
+
+# Size and Location
+# widthxheight±x±y
+window.geometry('300x200-5+40')
+
+# Stacking Order
+# This method doesn't appear to be exposed cleanly through Tkinter's API.
+root.tk.eval('wm stackorder '+str(window))
+
+# check if one window is above or below another:
+if (root.tk.eval('wm stackorder '+str(window)+' isabove '+str(otherwindow))=='1') ...
+if (root.tk.eval('wm stackorder '+str(window)+' isbelow '+str(otherwindow))=='1') ...
+
+# raise or lower windows
+window.lift()
+window.lift(otherwin)
+window.lower()
+window.lower(otherwin)
+
+
+# Stacking Order, work not only for toplevel windows,
+# but with any "sibling" widgets (those having the same parent).
+
+from tkinter import *
+from tkinter import ttk
+root = Tk()
+little = ttk.Label(root, text="Little")
+bigger = ttk.Label(root, text='Much bigger label')
+little.grid(column=0,row=0)
+bigger.grid(column=0,row=0)
+root.after(2000, lambda: little.lift())
+root.mainloop()
+
+
+# Resizing Behavior
+# Remember that if you've added a ttk::sizegrip widget to the window,
+# that you should remove it if you're making the window non-resizable.
+window.resizable(FALSE,FALSE)
+
+window.minsize(200,100)
+window.maxsize(500,500)
+
+# Iconifying and Withdrawing
+# states: "normal" and "iconic" (for an iconified window),
+# as well as several others: "withdrawn", "icon" or "zoomed".
+# "iconify" and "deiconify" which are shortcuts for
+# setting the "iconic" or "normal" states respectively.
+thestate = window.state()
+window.state('normal')
+window.iconify()
+window.deiconify()
+
+# --Standard Dialogs
+
+# Selecting Files and Directories
+from tkinter import filedialog
+filename = filedialog.askopenfilename()
+filename = filedialog.asksaveasfilename()
+dirname = filedialog.askdirectory()
+
+# Selecting Colors
+from tkinter import colorchooser
+colorchooser.askcolor(initialcolor='#ff0000')
+
+# Alert and Confirmation Dialogs
+from tkinter import messagebox
+messagebox.showinfo(message='Have a good day')
+
+messagebox.askyesno(
+	   message='Are you sure you want to install SuperVirus?'
+	   icon='question' title='Install')
+
+Type option	    Possible return values
+ok (default)	    "ok"
+okcancel 	    "ok"                or "cancel"
+yesno 	            "yes"               or "no"
+yesnocancel 	    "yes", "no"         or "cancel"
+retrycancel 	    "retry"             or "cancel"
+abortretryignore    "abort", "retry"    or "ignore"
+
+The full list of possible options is shown here:
+type 	    As described above.
+message     The main message displayed inside the alert.
+detail 	    If needed, a secondary message, often displayed
+            in a smaller font under the main message.
+title 	    Title for the dialog window. Not used on Mac OS X.
+icon 	    Icon to show: one of "info" (default), "error",
+            "question" or "warning".
+default     Specify which button (e.g. "ok" or "cancel"
+            for a "okcancel" type dialog) should be the default.
+parent 	    Specify a window of your application this dialog
+            is being posted for; this may cause the dialog to appear on top,
+            or on Mac OS X appear as a sheet for the window.

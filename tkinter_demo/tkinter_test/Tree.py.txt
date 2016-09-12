@@ -1,0 +1,46 @@
+
+tree = ttk.Treeview(parent)
+
+# Adding Items to the Tree
+
+# Inserted at the root, program chooses id:
+tree.insert('', 'end', 'widgets', text='Widget Tour')
+ 
+# Same thing, but inserted as first child:
+tree.insert('', 0, 'gallery', text='Applications')
+
+# Treeview chooses the id:
+id = tree.insert('', 'end', text='Tutorial')
+
+# Inserted underneath an existing node:
+tree.insert('widgets', 'end', text='Canvas')
+tree.insert(id, 'end', text='Tree')
+
+# Rearranging Items
+
+tree.move('widgets', 'gallery', 'end'); # move widgets under gallery
+
+tree.detach('widgets')
+
+tree.delete('widgets')
+
+tree.item('widgets', open=TRUE)
+isopen = tree.item('widgets', 'open')
+
+# Displaying Information for each Item
+
+tree = ttk.Treeview(root, columns=('size', 'modified'))
+tree['columns'] = ('size', 'modified', 'owner')
+
+tree.column('size', width=100, anchor='center')
+tree.heading('size', text='Size')
+
+tree.set('widgets', 'size', '12KB')
+size = tree.set('widgets', 'size')
+tree.insert('', 'end', text='Listbox', values=('15KB Yesterday mark'))
+
+# Item Appearance and Events
+tree.insert('', 'end', text='button', tags=('ttk', 'simple'))
+tree.tag_configure('ttk', background='yellow')
+# the item clicked can be found via tree.focus()
+tree.tag_bind('ttk', '<1>', itemClicked)
