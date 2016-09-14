@@ -60,7 +60,7 @@ animationCallbacks = {}
 def RotateLabelText(w, interval):
     global animationCallbacks
     animationCallbacks[w] = \
-        after(interval, lambda: RotateLabelText(w, interval))
+        w.after(interval, lambda: RotateLabelText(w, interval))
     text = w.cget('text')
     newText = text[1:] + text[0]
     w.configure(text=newText)
@@ -89,7 +89,7 @@ def animateLabelText(w, text, interval):
     animationCallbacks[w] = \
         w.after(interval, lambda: RotateLabelText(w, interval))
     def destory_callback(e):
-        after_cancel(animationCallbacks[e.widget])
+        w.after_cancel(animationCallbacks[e.widget])
         del animationCallbacks[e.widget]
     w.bind('<Destroy>', destory_callback)
 
@@ -139,9 +139,13 @@ def SelectNextImageFrame(w, interval):
     global animationCallbacks
     animationCallbacks[w] = \
         w.after(interval, lambda: SelectNextImageFrame(w, interval))
-    image = w.cget('image')
+    #image = w.cget('image')
+    image = w.image
     idx = -1
-    idx = int(image.cget('format').split()[-1])
+    # image.cget('format') -> ('GIF',)
+    # image.cget('format') -> ('GIF', <index object: '-index'>, 1)
+    if len(image.cget('format')) > 1:
+        idx = int(image.cget('format')[-1])
     try:
         idx += 1
         image.configure(format='GIF -index '+str(idx))
