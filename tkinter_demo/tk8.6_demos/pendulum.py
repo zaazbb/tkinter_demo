@@ -128,7 +128,7 @@ home = 160
 ##}
 ##showPendulum $w.c
 from math import hypot, atan2, sin, cos
-def showPendulum(canvas, at='', x='', y=''):
+def showPendulum(canvas, at='', x=0, y=0):
     global Theta, dTheta, pi, length, home
     if at == 'at' and (x != home or y != 25):
         dTheta = 0.0
@@ -205,20 +205,21 @@ def showPhase(canvas):
 ##    %W coords label_theta [expr %w-6] [expr $psh+4]
 ##}
 def destroy_callback(e):
-    e.widget.after_cancel(animationCallbacks['pendulum'])
+    w.after_cancel(animationCallbacks['pendulum'])
     del animationCallbacks['pendulum']
 c.bind('<Destroy>', destroy_callback)
 def ButtonPress_1_callback(e):
-    e.widget.after_cancel(animationCallbacks['pendulum'])
+    w.after_cancel(animationCallbacks['pendulum'])
     showPendulum(e.widget, 'at', e.x, e.y)
 c.bind('<1>', ButtonPress_1_callback)
 c.bind('<B1-Motion>', lambda e: showPendulum(e.widget, 'at', e.x, e.y))
 def ButtonRelease_1_callback(e):
     showPendulum(e.widget, 'at', e.x, e.y)
     animationCallbacks['pendulum'] = \
-        lambda: e.widget.after(15, lambda: repeat(e.widget.winfo_toplevel()))
+        w.after(15, lambda: repeat(e.widget.winfo_toplevel()))
 c.bind('<ButtonRelease-1>', ButtonRelease_1_callback)
 def c_Configure_callback(e):
+    global home
     e.widget.coords('plate', 0, 25, e.width, 25)
     home = e.width / 2
     e.widget.coords('pivot', home - 5, 20, home + 5, 30)
