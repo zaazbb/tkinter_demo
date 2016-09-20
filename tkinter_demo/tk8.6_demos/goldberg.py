@@ -304,45 +304,71 @@ def DoCtrlFrame(w):
                     pass
     btns.destroy()
 
-proc DoDetailFrame {w} {
-    set w2 $w.details.f
-    ttk::frame $w2
-
-    set bd 2
-    ttk::label $w2.l -textvariable S(cnt) -background white
-    grid $w2.l - - - -sticky ew -row 0
-    for {set i 1} {1} {incr i} {
-	if {[info procs "Move$i"] eq ""} break
-	ttk::label $w2.l$i -text $i -anchor e -width 2 -background white
-	ttk::label $w2.ll$i -textvariable STEP($i) -width 5 -background white
-	set row [expr {($i + 1) / 2}]
-	set col [expr {(($i + 1) & 1) * 2}]
-	grid $w2.l$i -sticky ew -row $row -column $col
-	grid $w2.ll$i -sticky ew -row $row -column [incr col]
-    }
-    grid columnconfigure $w2 1 -weight 1
-}
+##proc DoDetailFrame {w} {
+##    set w2 $w.details.f
+##    ttk::frame $w2
+##
+##    set bd 2
+##    ttk::label $w2.l -textvariable S(cnt) -background white
+##    grid $w2.l - - - -sticky ew -row 0
+##    for {set i 1} {1} {incr i} {
+##	if {[info procs "Move$i"] eq ""} break
+##	ttk::label $w2.l$i -text $i -anchor e -width 2 -background white
+##	ttk::label $w2.ll$i -textvariable STEP($i) -width 5 -background white
+##	set row [expr {($i + 1) / 2}]
+##	set col [expr {(($i + 1) & 1) * 2}]
+##	grid $w2.l$i -sticky ew -row $row -column $col
+##	grid $w2.ll$i -sticky ew -row $row -column [incr col]
+##    }
+##    grid columnconfigure $w2 1 -weight 1
+##}
+def DoDetailFrame(w):
+    w2 = f = ttk.Frame(details)
+    bd = 2
+    l = ttk.Label(w2, textvariable=S['cnt'], background='white')
+    l.grid(sticky='ew', row=0, column=3)
+    i = 1
+    while True:
+        if 'Move'+str(i) not in globals():
+            break
+        li = ttk.Label(w2, text=i, anchor=E, width=2, background='white')
+        lli = ttk.Label(w2, textvariable=STEP[i], width=5, background='white')
+        row = (i+1)/2
+        col = ((i+1)&1)*2
+        li.grid(sticky='ew', row=row, column=col)
+        lli.grid(sticky='ew', row=row, column=col+1)
+    w2.grid_columnconfigure(1, weight=1)
 
 # Map or unmap the ctrl window
-proc ShowCtrl {w} {
-    if {[winfo ismapped $w.ctrl]} {
-	pack forget $w.ctrl
-	$w.show config -text "\u00bb"
-    } else {
-	pack $w.ctrl -side right -fill both -ipady 5
-	$w.show config -text "\u00ab"
-    }
-}
+##proc ShowCtrl {w} {
+##    if {[winfo ismapped $w.ctrl]} {
+##	pack forget $w.ctrl
+##	$w.show config -text "\u00bb"
+##    } else {
+##	pack $w.ctrl -side right -fill both -ipady 5
+##	$w.show config -text "\u00ab"
+##    }
+##}
+def ShowCtrl(w):
+    if ctrl.winfo_ismapped():
+        ctrl.pack_forget()
+        show.config(text='\u00bb')
+    else:
+        ctrl.pack(side=RIGHT, fill=BOTH, ipady=5)
+        show.config(text='\u00ab')
 
-proc DrawAll {w} {
-    ResetStep
-    $w.c delete all
-    for {set i 0} {1} {incr i} {
-	set p "Draw$i"
-	if {[info procs $p] eq ""} break
-	$p $w
-    }
-}
+##proc DrawAll {w} {
+##    ResetStep
+##    $w.c delete all
+##    for {set i 0} {1} {incr i} {
+##	set p "Draw$i"
+##	if {[info procs $p] eq ""} break
+##	$p $w
+##    }
+##}
+def DrawAll(w):
+    ResetStep()
+    c.delete_all()
 
 proc ActiveGUI {w var1 var2 op} {
     global S MGO MSTART MDONE
